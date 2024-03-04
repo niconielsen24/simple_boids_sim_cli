@@ -3,6 +3,7 @@
 #include <stdio.h>
 
 #include "quad_tree.h"
+#include "linked_list.h"
 
 XY* new_point(int x, int y){
     XY* point = malloc(sizeof(XY));
@@ -32,7 +33,7 @@ QuadTree* new_qtree(AABB box){
     }
     
     *(tree->bound) = box;
-    tree->points = malloc(4 * sizeof(XY));
+    tree->points = calloc(4, sizeof(XY));
     tree->count = 0;
     tree->northWest = NULL;
     tree->northEast = NULL;
@@ -114,6 +115,36 @@ int insert_point(QuadTree * tree, XY point){
     if (insert_point(tree->southEast,point) == QTREE_NO_ERROR) return QTREE_NO_ERROR;
 
     return QTREE_FAILED_INSERTION_ERROR;
+}
+
+List query_range_rec(QuadTree* tree, AABB* range, List original){
+
+    if (aabb_intersection(*tree->bound, *range)) return original;
+
+    for (int i = 0; i<tree->count; i++) {
+        if (contains_point(*range, tree->points[i])) {
+            add(original, tree->points[i]);
+        }
+    }
+
+    if (tree->northWest == NULL) return original;
+
+    query_range_rec(tree->northWest, range, original);
+    query_range_rec(tree->northEast, range, original);
+    query_range_rec(tree->southWest, range, original);
+    query_range_rec(tree->southEast, range, original);
+
+    return original;
+};
+
+Query query_range(QuadTree* tree, AABB* range){
+    List l = empty_list(); 
+    query_range_rec(tree, range, l);
+    Query q;
+    XY* p = NULL;
+    q.size = l.size;
+    q.points = list_to_arr(l,p);
+    return q;
 }
 
 XY* destroy_point(XY* point){

@@ -3,11 +3,19 @@
 
 #include <stdbool.h>
 
-#define QTREE_NO_ERROR                  0x00
-#define QTREE_SUBDIVIDE_ALLOC_ERROR     0x01
-#define QTREE_INSERT_ON_NULL_TREE_ERROR 0x02
-#define QTREE_FAILED_INSERTION_ERROR    0x04
-#define QTREE_NOT_CONTAINED             0x08
+// #define QTREE_NO_ERROR                  0x00
+// #define QTREE_SUBDIVIDE_ALLOC_ERROR     0x01
+// #define QTREE_INSERT_ON_NULL_TREE_ERROR 0x02
+// #define QTREE_FAILED_INSERTION_ERROR    0x04
+// #define QTREE_NOT_CONTAINED             0x08
+
+enum Qtree_err{
+    QTREE_NO_ERROR,
+    QTREE_SUBDIVIDE_ALLOC_ERROR,
+    QTREE_INSERT_ON_NULL_TREE_ERROR,
+    QTREE_FAILED_INSERTION_ERROR,
+    QTREE_NOT_CONTAINED
+};
 
 typedef struct _xy {
     int x;
@@ -32,6 +40,11 @@ typedef struct _QuadTree{
 
 } QuadTree;
 
+typedef struct {
+    XY* points;
+    int size;
+} Query;
+
 XY * new_point(int x, int y);
 
 AABB * new_aabb(XY center, int half_dimension);
@@ -45,6 +58,8 @@ bool aabb_intersection(AABB one, AABB two);
 int subdivide(QuadTree * tree);
 
 int insert_point(QuadTree * tree, XY point);
+
+Query query_range(QuadTree* tree, AABB* range);
 
 XY* destroy_point(XY* point);
 
